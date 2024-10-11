@@ -1,0 +1,8 @@
+{
+    "short_name": "Therapist's Friend",
+    "name": "Therapist's Friend Application",
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff"
+  }
