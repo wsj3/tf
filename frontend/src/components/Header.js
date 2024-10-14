@@ -1,55 +1,39 @@
-import React, { useState } from 'react';
-import { AppBar, Toolbar, Button, IconButton, Switch, FormControlLabel } from '@mui/material';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import React from 'react';
+import { AppBar, Toolbar, Typography, Switch, Box, Button, Chip } from '@mui/material';
 import { Link } from 'react-router-dom';
+import MicIcon from '@mui/icons-material/Mic';
 
-function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [aiAssistantEnabled, setAiAssistantEnabled] = useState(false);
-
-  const handleLoginLogout = () => {
-    setIsLoggedIn(!isLoggedIn);
-    // Add actual login/logout logic here
-  };
-
-  const handleAiAssistantToggle = () => {
-    setAiAssistantEnabled(!aiAssistantEnabled);
-    // Add logic to enable/disable AI assistant here
-  };
-
+function Header({ isAIAssistantEnabled, toggleAIAssistant }) {
   return (
-    <AppBar position="static" sx={{ bgcolor: '#f0f2f5', boxShadow: 'none' }}>
-      <Toolbar>
-        <Button color="inherit" component={Link} to="/about" sx={{ color: '#333', textTransform: 'uppercase' }}>About</Button>
-        <Button color="inherit" component={Link} to="/contact" sx={{ color: '#333', textTransform: 'uppercase' }}>Contact</Button>
-        <Button color="inherit" component={Link} to="/help" sx={{ color: '#333', textTransform: 'uppercase' }}>Help</Button>
-        <div style={{ flexGrow: 1 }}></div>
-        <FormControlLabel
-          control={
+    <AppBar position="static">
+      <Toolbar sx={{ justifyContent: 'space-between', padding: '0 16px' }}>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
+          Therapist's Friend
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+            <Typography variant="body2" sx={{ mr: 1, color: 'white' }}>AI Assistant</Typography>
             <Switch
-              checked={aiAssistantEnabled}
-              onChange={handleAiAssistantToggle}
-              color="primary"
+              checked={isAIAssistantEnabled}
+              onChange={toggleAIAssistant}
+              color="default"
+              size="small"
             />
-          }
-          label="AI Assistant"
-          sx={{ color: '#333', mr: 2 }}
-        />
-        <Button 
-          color="inherit" 
-          onClick={handleLoginLogout} 
-          sx={{ color: '#333', textTransform: 'uppercase', mr: 2 }}
-        >
-          {isLoggedIn ? 'Logout' : 'Login'}
-        </Button>
-        <IconButton
-          size="large"
-          aria-label="account of current user"
-          color="inherit"
-          sx={{ color: '#333' }}
-        >
-          <AccountCircleIcon />
-        </IconButton>
+            {isAIAssistantEnabled && (
+              <Chip
+                icon={<MicIcon />}
+                label="Listening"
+                color="secondary"
+                size="small"
+                sx={{ ml: 1 }}
+              />
+            )}
+          </Box>
+          <Button color="inherit" component={Link} to="/about" size="small">ABOUT</Button>
+          <Button color="inherit" component={Link} to="/contact" size="small">CONTACT</Button>
+          <Button color="inherit" component={Link} to="/help" size="small">HELP</Button>
+          <Button color="inherit" size="small">LOGIN</Button>
+        </Box>
       </Toolbar>
     </AppBar>
   );

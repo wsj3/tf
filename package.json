@@ -1,0 +1,20 @@
+{
+  "name": "therapists-friend",
+  "version": "1.0.0",
+  "description": "AI driven tool in support of mental health therapy",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm start",
+    "install": "concurrently \"cd frontend && npm install\" \"cd backend && npm install\"",
+    "build": "concurrently \"cd frontend && npm run build\" \"cd backend && npm run build\"",
+    "test": "concurrently \"cd frontend && npm test\" \"cd backend && npm test\""
+  },
+  "keywords": ["therapy", "mental health", "AI"],
+  "author": "Your Name",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^6.2.0"
+  }
+}

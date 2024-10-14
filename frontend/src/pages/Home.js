@@ -5,15 +5,17 @@ function Home() {
   return (
     <Box sx={{ 
       display: 'flex', 
+      flexDirection: 'column',
       justifyContent: 'center', 
       alignItems: 'center', 
-      height: 'calc(100vh - 64px)' // Adjust based on your header height
+      height: 'calc(100vh - 64px)', // Adjust based on your header height
+      backgroundColor: '#f5f5f5', // Light background color
     }}>
       <Typography 
         variant="h5" 
         align="center" 
         sx={{ 
-          color: '#ecf0f1', 
+          color: '#333', // Dark text color for better readability
           maxWidth: '800px',
           padding: '20px'
         }}

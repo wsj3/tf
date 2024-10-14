@@ -2,34 +2,31 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const errorHandler = require('./middleware/errorHandler');
-const userRoutes = require('./routes/userRoutes');
-
-// Side menu routes
-const calendarRoutes = require('./routes/calendar');
-const patientsRoutes = require('./routes/patients');
-const messagesRoutes = require('./routes/messages');
-const billingRoutes = require('./routes/billing');
-const recordsRoutes = require('./routes/records');
-const sessionsRoutes = require('./routes/sessions');
-const treatmentRoutes = require('./routes/treatment');
-const analysisRoutes = require('./routes/analysis');
-const settingsRoutes = require('./routes/settings');
-
-// Top menu routes
-const aboutRoutes = require('./routes/about');
-const helpRoutes = require('./routes/help');
-const authRoutes = require('./routes/auth');
-const assistantRoutes = require('./routes/assistant');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const OpenAI = require('openai');
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+
+// Set up multer for handling file uploads
+const upload = multer({ dest: 'uploads/' });
+
+// Initialize OpenAI
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI;
+console.log('MONGODB_URI:', process.env.MONGODB_URI);
+console.log('PORT:', process.env.PORT);
 
 mongoose.connect(MONGODB_URI, { 
   serverSelectionTimeoutMS: 5000,
@@ -48,27 +45,66 @@ app.get('/', (req, res) => {
   res.send('Therapist Friend API is running');
 });
 
-app.use('/api/users', userRoutes);
+// AI Assistant route
+app.post('/api/assistant/process', upload.single('audio'), async (req, res) => {
+  console.log('Received audio processing request');
+  if (!req.file) {
+    console.log('No audio file provided');
+    return res.status(400).json({ error: "No audio file provided" });
+  }
 
-// Side menu routes
-app.use('/api/calendar', calendarRoutes);
-app.use('/api/patients', patientsRoutes);
-app.use('/api/messages', messagesRoutes);
-app.use('/api/billing', billingRoutes);
-app.use('/api/records', recordsRoutes);
-app.use('/api/sessions', sessionsRoutes);
-app.use('/api/treatment', treatmentRoutes);
-app.use('/api/analysis', analysisRoutes);
-app.use('/api/settings', settingsRoutes);
+  try {
+    console.log('Transcribing audio...');
+    const transcript = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(req.file.path),
+      model: "whisper-1",
+    });
+    console.log('Transcript:', transcript.text);
 
-// Top menu routes
-app.use('/api/about', aboutRoutes);
-app.use('/api/help', helpRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/assistant', assistantRoutes);
+    console.log('Generating response...');
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: transcript.text }
+      ],
+    });
+    const responseText = completion.choices[0].message.content;
+    console.log('AI Response:', responseText);
 
-// Error handling middleware
-app.use(errorHandler);
+    console.log('Converting response to speech...');
+    const speechFile = path.resolve("./tmp/response.mp3");
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "alloy",
+      input: responseText,
+    });
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    await fs.promises.writeFile(speechFile, buffer);
+
+    console.log('Sending response...');
+    res.json({
+      transcript: transcript.text,
+      response: responseText,
+      audio_url: "/api/assistant/audio"
+    });
+
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(500).json({ error: "An error occurred while processing your request", details: error.message, stack: error.stack });
+  } finally {
+    // Clean up the uploaded file
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error('Error deleting file:', err);
+    });
+  }
+});
+
+// Route to serve the generated audio file
+app.get('/api/assistant/audio', (req, res) => {
+  const filePath = path.resolve("./tmp/response.mp3");
+  res.sendFile(filePath);
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
