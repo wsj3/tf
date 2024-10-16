@@ -9,12 +9,36 @@
     "start:backend": "cd backend && npm start",
     "install": "concurrently \"cd frontend && npm install\" \"cd backend && npm install\"",
     "build": "concurrently \"cd frontend && npm run build\" \"cd backend && npm run build\"",
-    "test": "concurrently \"cd frontend && npm test\" \"cd backend && npm test\""
+    "test": "concurrently \"cd frontend && npm test\" \"cd backend && npm test\"",
+    "eject": "react-scripts eject"
   },
-  "keywords": ["therapy", "mental health", "AI"],
+  "keywords": [
+    "therapy",
+    "mental health",
+    "AI"
+  ],
   "author": "Your Name",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^6.2.0"
+    "concurrently": "^6.5.1",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

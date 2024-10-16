@@ -1,11 +1,25 @@
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
+
+console.log('Current directory:', __dirname);
+console.log('Env file path:', path.resolve(__dirname, '.env'));
+
+const result = dotenv.config({ path: path.resolve(__dirname, '.env') });
+if (result.error) {
+  console.log('Error loading .env file:', result.error);
+} else {
+  console.log('.env file loaded successfully');
+}
+
+console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'API key is set' : 'API key is missing');
+console.log('Environment variables:', Object.keys(process.env));
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
-const path = require('path');
-const OpenAI = require('openai');
+const { OpenAI } = require('openai');
 
 const app = express();
 
